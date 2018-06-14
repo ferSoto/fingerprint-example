@@ -16,7 +16,7 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), FingerprintHandler.Handler {
     companion object {
         private const val ALLOW_FINGERPRINT_SCAN_TAG = "allow_fingerprint"
         private const val HARDWARE_ERROR_TAG = "hardware_error"
@@ -25,10 +25,9 @@ class MainActivity : AppCompatActivity() {
         private const val INSECURE_ERROR_TAG = "insecure_error"
 
         private const val ANDROID_KEY_STORE = "AndroidKeyStore"
-        private const val KEY_NAME = "holi"
+        private const val KEY_NAME = "random_key_name"
     }
 
-    private lateinit var cipher: Cipher
     private lateinit var keyStore: KeyStore
     private lateinit var keyGenerator: KeyGenerator
     private lateinit var keyguardManager: KeyguardManager
@@ -46,28 +45,10 @@ class MainActivity : AppCompatActivity() {
             keyStore = KeyStore.getInstance(ANDROID_KEY_STORE)
             keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEY_STORE)
 
-            keyStore.load(null)
-            val builder = KeyGenParameterSpec
-                    .Builder(KEY_NAME, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                    .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
-                    .setUserAuthenticationRequired(true)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+            generateKey()
+            cryptoObject = createCryptoObject()
 
-            keyGenerator.init(builder.build())
-            keyGenerator.generateKey()
-
-            cipher = Cipher.getInstance(
-                    KeyProperties.KEY_ALGORITHM_AES + "/"
-                    + KeyProperties.BLOCK_MODE_CBC + "/"
-                    + KeyProperties.ENCRYPTION_PADDING_PKCS7
-            )
-
-            keyStore.load(null)
-            val key = keyStore.getKey(KEY_NAME, null) as SecretKey
-            cipher.init(Cipher.ENCRYPT_MODE, key)
-            cryptoObject = FingerprintManager.CryptoObject(cipher)
-
-            val fingerprintHandler = FingerprintHandler(applicationContext)
+            val fingerprintHandler = FingerprintHandler(this)
             fingerprintHandler.startAuth(fingerprintManager, cryptoObject)
         }
     }
@@ -82,6 +63,30 @@ class MainActivity : AppCompatActivity() {
 
     private fun hasFingerprintPermission() =
             checkSelfPermission(Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED
+
+    private fun generateKey() {
+        keyStore.load(null)
+        val builder = KeyGenParameterSpec
+                .Builder(KEY_NAME, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+                .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                .setUserAuthenticationRequired(true)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+
+        keyGenerator.init(builder.build())
+        keyGenerator.generateKey()
+    }
+
+    private fun createCryptoObject(): FingerprintManager.CryptoObject {
+        val cipher = Cipher.getInstance(
+                KeyProperties.KEY_ALGORITHM_AES + "/"
+                        + KeyProperties.BLOCK_MODE_CBC + "/"
+                        + KeyProperties.ENCRYPTION_PADDING_PKCS7
+        )
+        keyStore.load(null)
+        val key = keyStore.getKey(KEY_NAME, null) as SecretKey
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        return FingerprintManager.CryptoObject(cipher)
+    }
 
     private fun showFingerprintFragment(): Boolean {
         addFragment(ResponseFragment.getInstance(
@@ -132,5 +137,15 @@ class MainActivity : AppCompatActivity() {
         fragmentManager.beginTransaction()
                 .add(fragment_container.id, fragment, tag)
                 .commit()
+    }
+
+    // Handler
+
+    override fun onSuccess() {
+        // Do something
+    }
+
+    override fun onFailed(errorCode: Int) {
+        // Do something
     }
 }
