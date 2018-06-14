@@ -17,22 +17,27 @@ class FingerprintHandler(private var listener: Handler) : FingerprintManager.Aut
     }
 
     override fun onAuthenticationSucceeded(result: FingerprintManager.AuthenticationResult?) {
-        cancellationSignal?.cancel()
+        stop()
         listener.onSuccess()
     }
 
     override fun onAuthenticationHelp(helpCode: Int, helpString: CharSequence?) {
-        cancellationSignal?.cancel()
+        stop()
         listener.onFailed(helpCode)
     }
 
     override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
-        cancellationSignal?.cancel()
+        stop()
         listener.onFailed(errorCode)
     }
 
     override fun onAuthenticationFailed() {
-        cancellationSignal?.cancel()
+        stop()
         listener.onFailed(1000)
+    }
+
+    private fun stop() {
+        cancellationSignal?.cancel()
+        cancellationSignal = null
     }
 }
