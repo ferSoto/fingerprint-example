@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Fingerprint</string>
+    <string name="auth_text">Authentication</string>
+    <string name="fingerprint_text">Please, put your fingertip in the fingerprint scanner.</string>
+    <string name="error">Error</string>
+    <string name="error_hardware">Hardware incompatible.</string>
+    <string name="error_fingerprint">No enrolled fingerprint found. Try enrolling a new one.</string>
+    <string name="error_insecure">Keyguard is insecure. Try securing your device with password, PIN or pattern besides of a fingerprint.</string>
+    <string name="error_permission">App did not get permission from user.</string>
+</resources>
