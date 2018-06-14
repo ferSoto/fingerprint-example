@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">Fingerprint</string>
+
     <string name="auth_text">Authentication</string>
+    <string name="successful_auth">Successful Auth!</string>
     <string name="fingerprint_text">Please, put your fingertip in the fingerprint scanner.</string>
+
     <string name="error">Error</string>
     <string name="error_hardware">Hardware incompatible.</string>
     <string name="error_fingerprint">No enrolled fingerprint found. Try enrolling a new one.</string>

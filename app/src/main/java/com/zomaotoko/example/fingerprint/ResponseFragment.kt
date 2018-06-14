@@ -30,8 +30,14 @@ class ResponseFragment : Fragment() {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        headerTextView.text = getString(arguments.getInt(HEADER_KEY, 0))
+        headerTextView.text = getSecureString(arguments.getInt(HEADER_KEY, 0))
         imageView.setImageResource(arguments.getInt(IMAGE_KEY, 0))
-        messageTextView.text = getString(arguments.getInt(MESSAGE_KEY, 0))
+        messageTextView.text = getSecureString(arguments.getInt(MESSAGE_KEY, 0))
     }
+
+    private fun getSecureString(resource: Int) = when(resource) {
+        0 -> ""
+        else -> getString(resource)
+    }
+
 }

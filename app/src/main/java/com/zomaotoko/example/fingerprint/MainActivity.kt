@@ -19,10 +19,12 @@ import javax.crypto.SecretKey
 class MainActivity : AppCompatActivity(), FingerprintHandler.Handler {
     companion object {
         private const val ALLOW_FINGERPRINT_SCAN_TAG = "allow_fingerprint"
+        private const val SUCCESSFUL_AUTH_TAG = "successful_auth"
         private const val HARDWARE_ERROR_TAG = "hardware_error"
         private const val PERMISSION_ERROR_TAG = "permission_error"
         private const val FINGERPRINT_ERROR_TAG = "fingerprint_error"
         private const val INSECURE_ERROR_TAG = "insecure_error"
+        private const val AUTH_ERROR_TAG = "auth_error"
 
         private const val ANDROID_KEY_STORE = "AndroidKeyStore"
         private const val KEY_NAME = "random_key_name"
@@ -61,8 +63,9 @@ class MainActivity : AppCompatActivity(), FingerprintHandler.Handler {
         else -> showFingerprintFragment()
     }
 
-    private fun hasFingerprintPermission() =
-            checkSelfPermission(Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED
+    private fun hasFingerprintPermission(): Boolean {
+        return checkSelfPermission(Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED
+    }
 
     private fun generateKey() {
         keyStore.load(null)
@@ -133,19 +136,41 @@ class MainActivity : AppCompatActivity(), FingerprintHandler.Handler {
         return false
     }
 
+    private fun successfulAuth() {
+        replaceFragment(ResponseFragment.getInstance(
+                R.string.successful_auth,
+                R.drawable.ic_success,
+                0
+        ), SUCCESSFUL_AUTH_TAG)
+    }
+
+    private fun errorOnAuth() {
+        replaceFragment(ResponseFragment.getInstance(
+                R.string.error,
+                R.drawable.ic_error,
+                0
+        ), AUTH_ERROR_TAG)
+    }
+
     private fun addFragment(fragment: Fragment, tag: String) {
         fragmentManager.beginTransaction()
-                .add(fragment_container.id, fragment, tag)
+                .add(fragmentContainer.id, fragment, tag)
+                .commit()
+    }
+
+    private fun replaceFragment(fragment: Fragment, tag: String) {
+        fragmentManager.beginTransaction()
+                .replace(fragmentContainer.id, fragment, tag)
                 .commit()
     }
 
     // Handler
 
     override fun onSuccess() {
-        // Do something
+        successfulAuth()
     }
 
     override fun onFailed(errorCode: Int) {
-        // Do something
+        errorOnAuth()
     }
 }
